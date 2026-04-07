@@ -1,0 +1,119 @@
+version: "3.8"
+
+# ===========================================
+# TRAEFIK - Reverse Proxy with SSL
+# ===========================================
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: always
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@example.com}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--log.level=INFO"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      # Dashboard (optional - secure it!)
+      # - "traefik.http.routers.dashboard.rule=Host(`traefik.yourdomain.com`)"
+      # - "traefik.http.routers.dashboard.service=api@internal"
+      # - "traefik.http.routers.dashboard.entrypoints=websecure"
+      # - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      # - "traefik.http.routers.dashboard.middlewares=auth"
+
+  # ===========================================
+  # DECOMPRITAS - Main Store
+  # ===========================================
+  decompritas:
+    image: node:20-alpine
+    container_name: decompritas
+    restart: always
+    working_dir: /app
+    env_file:
+      - ./stores/decompritas/.env
+    environment:
+      - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
+      - PORT=3000
+    volumes:
+      - ../:/app:ro
+      - ./stores/decompritas/public/uploads:/app/public/uploads
+    command: sh -c "npm ci --only=production && npm run build && npm start"
+    networks:
+      - web
+      - decompritas_internal
+    depends_on:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.decompritas.rule=Host(`decompritas.com`,`www.decompritas.com`)"
+      - "traefik.http.routers.decompritas.entrypoints=websecure"
+      - "traefik.http.routers.decompritas.tls.certresolver=letsencrypt"
+      - "traefik.http.services.decompritas.loadbalancer.server.port=3000"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ===========================================
+  # EXAMPLE: ADD MORE STORES HERE
+  # ===========================================
+  # indira-store:
+  #   image: node:20-alpine
+  #   container_name: indira-store
+  #   restart: always
+  #   working_dir: /app
+  #   env_file:
+  #     - ./stores/indira-store/.env
+  #   environment:
+  #     - NODE_ENV=production
+  #     - HOSTNAME=0.0.0.0
+  #     - PORT=3000
+  #   volumes:
+  #     - ../:/app:ro
+  #     - ./stores/indira-store/public/uploads:/app/public/uploads
+  #   command: sh -c "npm ci --only=production && npm run build && npm start"
+  #   networks:
+  #     - web
+  #   depends_on:
+  #     - traefik
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.indira.rule=Host(`indirastore.com`,`www.indirastore.com`)"
+  #     - "traefik.http.routers.indira.entrypoints=websecure"
+  #     - "traefik.http.routers.indira.tls.certresolver=letsencrypt"
+  #     - "traefik.http.services.indira.loadbalancer.server.port=3000"
+  #   healthcheck:
+  #     test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
+
+# ===========================================
+# NETWORKS
+# ===========================================
+networks:
+  web:
+    external: false
+  decompritas_internal:
+    external: false
+  # indira_internal:
+  #   external: false

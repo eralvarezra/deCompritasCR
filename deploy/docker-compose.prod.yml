@@ -1,0 +1,133 @@
+version: "3.8"
+
+# ===========================================
+# PRODUCTION DOCKER COMPOSE
+# ===========================================
+# Uses pre-built Docker images for faster deployments
+# Run: docker compose -f docker-compose.prod.yml up -d
+
+x-app-template: &app-template
+  restart: always
+  networks:
+    - web
+  labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.${STORE_NAME}.entrypoints=websecure"
+    - "traefik.http.routers.${STORE_NAME}.tls.certresolver=letsencrypt"
+    - "traefik.http.services.${STORE_NAME}.loadbalancer.server.port=3000"
+
+services:
+  # ===========================================
+  # TRAEFIK - Reverse Proxy with SSL
+  # ===========================================
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: always
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--log.level=INFO"
+      - "--accesslog=true"
+      - "--accesslog.filepath=/logs/access.log"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./letsencrypt:/letsencrypt
+      - ./logs:/logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - web
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===========================================
+  # DECOMPRITAS - Main Store
+  # ===========================================
+  decompritas:
+    <<: *app-template
+    image: decompritas:latest
+    container_name: decompritas
+    build:
+      context: ..
+      dockerfile: Dockerfile.production
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+        SITE_URL: ${SITE_URL}
+        MAIN_DOMAIN: ${MAIN_DOMAIN}
+    env_file:
+      - ./stores/decompritas/.env
+    volumes:
+      - ./stores/decompritas/public/uploads:/app/public/uploads
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.decompritas.rule=Host(`decompritas.com`,`www.decompritas.com`)"
+      - "traefik.http.routers.decompritas.entrypoints=websecure"
+      - "traefik.http.routers.decompritas.tls.certresolver=letsencrypt"
+      - "traefik.http.services.decompritas.loadbalancer.server.port=3000"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ===========================================
+  # ADD MORE STORES BELOW
+  # ===========================================
+  # tienda2:
+  #   <<: *app-template
+  #   image: tienda2:latest
+  #   build:
+  #     context: ..
+  #     dockerfile: Dockerfile.production
+  #     args:
+  #       NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+  #       # ... etc
+  #   env_file:
+  #     - ./stores/tienda2/.env
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.tienda2.rule=Host(`tienda2.com`)"
+  #     - "traefik.http.routers.tienda2.entrypoints=websecure"
+  #     - "traefik.http.routers.tienda2.tls.certresolver=letsencrypt"
+  #     - "traefik.http.services.tienda2.loadbalancer.server.port=3000"
+
+  # ===========================================
+  # WATCHTOWER - Auto-update containers (optional)
+  # ===========================================
+  # watchtower:
+  #   image: containrrr/watchtower
+  #   container_name: watchtower
+  #   restart: always
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   environment:
+  #     - WATCHTOWER_CLEANUP=true
+  #     - WATCHTOWER_POLL_INTERVAL=300
+  #   networks:
+  #     - web
+
+networks:
+  web:
+    external: false
+
+# ===========================================
+# VOLUMES FOR PERSISTENT DATA
+# ===========================================
+volumes:
+  letsencrypt:
+  logs:
