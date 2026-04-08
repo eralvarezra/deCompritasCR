@@ -16,7 +16,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.decompritas.entrypoints=web,websecure"
-      - "traefik.http.routers.decompritas.rule=Host(`decompritas.com`) || Host(`www.decompritas.com`)"
+      - "traefik.http.routers.decompritas.rule=Host(`decompritascr.com`) || Host(`www.decompritascr.com`)"
       - "traefik.http.routers.decompritas.tls.certresolver=letsencrypt"
       - "traefik.http.services.decompritas.loadbalancer.server.port=3000"
     networks:
