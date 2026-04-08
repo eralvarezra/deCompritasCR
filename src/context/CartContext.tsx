@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useReducer, useEffect, ReactNode } from 'react'
-import { Product, ProductVariant, CartItem, getDiscountedPrice, getEffectivePrice } from '@/types/database.types'
+import { Product, ProductVariant, CartItem, getDiscountedPrice, getEffectivePrice, getAvailableStock, getEffectiveStock } from '@/types/database.types'
 
 interface CartState {
   items: CartItem[]
@@ -19,14 +19,15 @@ type CartAction =
 
 const CartContext = createContext<{
   state: CartState
-  addItem: (product: Product, variant?: ProductVariant) => void
+  addItem: (product: Product, variant?: ProductVariant) => { success: boolean; message?: string }
   removeItem: (productId: string, variantId?: string) => void
-  updateQuantity: (productId: string, quantity: number, variantId?: string) => void
+  updateQuantity: (productId: string, quantity: number, variantId?: string) => { success: boolean; message?: string }
   clearCart: () => void
   toggleCart: () => void
   closeCart: () => void
   totalItems: number
   totalPrice: number
+  getAvailableQuantity: (productId: string, variantId?: string) => number
 } | null>(null)
 
 // Helper to get unique cart item key
@@ -44,7 +45,18 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         getCartItemKey(item.product.id, item.variant?.id) === itemKey
       )
 
+      // Get available stock for this product/variant
+      const availableStock = getAvailableStock(product, variant)
+
       if (existingItem) {
+        // Get effective stock to check if it's a pre-order
+        const effectiveStock = getEffectiveStock(product, variant)
+        const isPreOrder = effectiveStock <= 0
+
+        // Check if adding one more would exceed available stock (only for in-stock items)
+        if (!isPreOrder && existingItem.quantity + 1 > availableStock) {
+          return state // Don't add if it exceeds stock
+        }
         return {
           ...state,
           items: state.items.map((item) =>
@@ -53,6 +65,14 @@ function cartReducer(state: CartState, action: CartAction): CartState {
               : item
           ),
         }
+      }
+
+      // For new items, check if it's a pre-order or has available stock
+      const effectiveStock = getEffectiveStock(product, variant)
+      const isPreOrder = effectiveStock <= 0
+
+      if (availableStock < 1 && !isPreOrder) {
+        return state // Don't add if no stock and not a pre-order
       }
 
       return {
@@ -82,6 +102,29 @@ function cartReducer(state: CartState, action: CartAction): CartState {
           ...state,
           items: state.items.filter(
             (item) => getCartItemKey(item.product.id, item.variant?.id) !== itemKey
+          ),
+        }
+      }
+
+      // Find the item to get its stock info
+      const existingItem = state.items.find(
+        (item) => getCartItemKey(item.product.id, item.variant?.id) === itemKey
+      )
+
+      if (existingItem) {
+        const availableStock = getAvailableStock(existingItem.product, existingItem.variant)
+        const effectiveStock = getEffectiveStock(existingItem.product, existingItem.variant)
+        const isPreOrder = effectiveStock <= 0
+
+        // For pre-orders, allow any quantity; for in-stock items, limit to available stock
+        const limitedQuantity = isPreOrder ? quantity : Math.min(quantity, availableStock)
+
+        return {
+          ...state,
+          items: state.items.map((item) =>
+            getCartItemKey(item.product.id, item.variant?.id) === itemKey
+              ? { ...item, quantity: limitedQuantity }
+              : item
           ),
         }
       }
@@ -139,15 +182,77 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.items))
   }, [state.items])
 
-  const addItem = (product: Product, variant?: ProductVariant) =>
+  const addItem = (product: Product, variant?: ProductVariant): { success: boolean; message?: string } => {
+    // Get available stock and effective stock
+    const availableStock = getAvailableStock(product, variant)
+    const effectiveStock = getEffectiveStock(product, variant)
+    const isPreOrder = effectiveStock <= 0
+
+    // Find existing item in cart
+    const itemKey = getCartItemKey(product.id, variant?.id)
+    const existingItem = state.items.find(
+      (item) => getCartItemKey(item.product.id, item.variant?.id) === itemKey
+    )
+
+    const currentQuantity = existingItem?.quantity || 0
+
+    // Check if adding one more would exceed available stock (for in-stock items only)
+    // Pre-orders have unlimited quantity since stock = 0
+    if (!isPreOrder && currentQuantity + 1 > availableStock) {
+      return {
+        success: false,
+        message: `Solo hay ${availableStock} unidades disponibles`
+      }
+    }
+
     dispatch({ type: 'ADD_ITEM', payload: { product, variant } })
+    return { success: true }
+  }
+
   const removeItem = (productId: string, variantId?: string) =>
     dispatch({ type: 'REMOVE_ITEM', payload: { productId, variantId } })
-  const updateQuantity = (productId: string, quantity: number, variantId?: string) =>
+
+  const updateQuantity = (productId: string, quantity: number, variantId?: string): { success: boolean; message?: string } => {
+    // Find the item to get its stock info
+    const itemKey = getCartItemKey(productId, variantId)
+    const existingItem = state.items.find(
+      (item) => getCartItemKey(item.product.id, item.variant?.id) === itemKey
+    )
+
+    if (existingItem && quantity > 0) {
+      const availableStock = getAvailableStock(existingItem.product, existingItem.variant)
+      const effectiveStock = getEffectiveStock(existingItem.product, existingItem.variant)
+      const isPreOrder = effectiveStock <= 0
+
+      // Only check stock limits for in-stock items (not pre-orders)
+      if (!isPreOrder && quantity > availableStock) {
+        // Update to max available instead of rejecting
+        dispatch({ type: 'UPDATE_QUANTITY', payload: { productId, variantId, quantity: availableStock } })
+        return {
+          success: false,
+          message: `Solo hay ${availableStock} unidades disponibles`
+        }
+      }
+    }
+
     dispatch({ type: 'UPDATE_QUANTITY', payload: { productId, variantId, quantity } })
+    return { success: true }
+  }
+
   const clearCart = () => dispatch({ type: 'CLEAR_CART' })
   const toggleCart = () => dispatch({ type: 'TOGGLE_CART' })
   const closeCart = () => dispatch({ type: 'CLOSE_CART' })
+
+  // Helper to get available quantity for a product/variant
+  const getAvailableQuantity = (productId: string, variantId?: string): number => {
+    const itemKey = getCartItemKey(productId, variantId)
+    const existingItem = state.items.find(
+      (item) => getCartItemKey(item.product.id, item.variant?.id) === itemKey
+    )
+
+    if (!existingItem) return 0
+    return existingItem.quantity
+  }
 
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0)
   const totalPrice = state.items.reduce((sum, item) => {
@@ -168,6 +273,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         closeCart,
         totalItems,
         totalPrice,
+        getAvailableQuantity,
       }}
     >
       {children}
