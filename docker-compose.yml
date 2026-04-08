@@ -3,8 +3,6 @@ version: '3.8'
 services:
   app:
     build: .
-    ports:
-      - "3000:3000"
     environment:
       - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
@@ -14,8 +12,16 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - CRON_SECRET=${CRON_SECRET}
-      - SITE_URL=${SITE_URL}
-      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
     restart: unless-stopped
-    volumes:
-      - ./public/uploads:/app/public/uploads
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.decompritas.entrypoints=web,websecure"
+      - "traefik.http.routers.decompritas.rule=Host(`decompritas.com`) || Host(`www.decompritas.com`)"
+      - "traefik.http.routers.decompritas.tls.certresolver=letsencrypt"
+      - "traefik.http.services.decompritas.loadbalancer.server.port=3000"
+    networks:
+      - deploy_web
+
+networks:
+  deploy_web:
+    external: true
