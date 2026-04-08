@@ -15,10 +15,17 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.decompritas.entrypoints=web,websecure"
+      # HTTPS router
+      - "traefik.http.routers.decompritas.entrypoints=websecure"
       - "traefik.http.routers.decompritas.rule=Host(`decompritascr.com`) || Host(`www.decompritascr.com`)"
       - "traefik.http.routers.decompritas.tls.certresolver=letsencrypt"
       - "traefik.http.services.decompritas.loadbalancer.server.port=3000"
+      # HTTP to HTTPS redirect
+      - "traefik.http.routers.decompritas-redirect.entrypoints=web"
+      - "traefik.http.routers.decompritas-redirect.rule=Host(`decompritascr.com`) || Host(`www.decompritascr.com`)"
+      - "traefik.http.routers.decompritas-redirect.middlewares=decompritas-redirect"
+      - "traefik.http.middlewares.decompritas-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.decompritas-redirect.redirectscheme.permanent=true"
     networks:
       - deploy_web
 
