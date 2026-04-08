@@ -609,18 +609,53 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
                 {/* Order Total */}
                 <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Subtotal productos</span>
-                    <span>{formatPrice(totalPrice)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Envío ({selectedShippingMethod.name})</span>
-                    <span className={shippingCost === 0 ? 'text-green-600 font-medium' : ''}>{shippingCost === 0 ? 'Gratis' : formatPrice(shippingCost)}</span>
-                  </div>
-                  <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-200">
-                    <span>Total a pagar</span>
-                    <span className="text-pink-700">{formatPrice(totalWithShipping)}</span>
-                  </div>
+                  {hasPreOrderItems ? (
+                    <>
+                      {/* Pre-order breakdown */}
+                      {inStockItems.length > 0 && (
+                        <div className="flex justify-between text-sm text-gray-600">
+                          <span>Productos disponibles (100%)</span>
+                          <span className="text-green-600">{formatPrice(inStockTotal)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-sm text-gray-600">
+                        <span>Pre-pedidos (50% adelanto)</span>
+                        <span className="text-amber-600">{formatPrice(Math.ceil(preOrderTotal * 0.5))}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-gray-600">
+                        <span>Envío ({selectedShippingMethod.name})</span>
+                        <span className={shippingCost === 0 ? 'text-green-600 font-medium' : ''}>{shippingCost === 0 ? 'Gratis' : formatPrice(shippingCost)}</span>
+                      </div>
+                      <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-200">
+                        <span>Pago inicial requerido</span>
+                        <span className="text-pink-700">{formatPrice(advancePaymentAmount)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-gray-500 pt-1">
+                        <span>Saldo pendiente (al entregar)</span>
+                        <span>{formatPrice(remainingPaymentAmount)}</span>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-400 pt-1 border-t border-gray-200 mt-2">
+                        <span>Total del pedido</span>
+                        <span>{formatPrice(totalWithShipping)}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Regular order */}
+                      <div className="flex justify-between text-sm text-gray-600">
+                        <span>Subtotal productos</span>
+                        <span>{formatPrice(totalPrice)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-gray-600">
+                        <span>Envío ({selectedShippingMethod.name})</span>
+                        <span className={shippingCost === 0 ? 'text-green-600 font-medium' : ''}>{shippingCost === 0 ? 'Gratis' : formatPrice(shippingCost)}</span>
+                      </div>
+                      <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-200">
+                        <span>Total a pagar</span>
+                        <span className="text-pink-700">{formatPrice(totalWithShipping)}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Submit Button */}
@@ -629,8 +664,11 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                   disabled={isSubmitting || state.items.length === 0}
                   className={clsx('w-full py-4 rounded-xl font-semibold text-white transition-all touch-target text-base', isSubmitting || state.items.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-[#b55ca6] active:bg-[#9c4a8f] active:scale-[0.98]')}
                 >
-                  {isSubmitting ? (<span className="flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin" />Procesando...</span>) : `Confirmar Pedido - ${formatPrice(totalWithShipping)}`}
+                  {isSubmitting ? (<span className="flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin" />Procesando...</span>) : `Confirmar Pedido - ${formatPrice(hasPreOrderItems ? advancePaymentAmount : totalWithShipping)}`}
                 </button>
+                {hasPreOrderItems && (
+                  <p className="text-xs text-amber-600 text-center">Este pedido requiere un adelanto del 50% para pre-pedidos</p>
+                )}
                 <p className="text-xs text-gray-500 text-center">Te contactaremos para coordinar el pago y la entrega.</p>
               </div>
             </form>
