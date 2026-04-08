@@ -155,7 +155,7 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
             } as React.CSSProperties}
           >
             {product.image_url && (
-              <img src={product.image_url} alt="" className="w-full h-full object-cover" />
+              <img src={product.image_url} alt="" className="w-full h-full object-contain" />
             )}
           </div>
         </div>
@@ -175,7 +175,7 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
             onClick={onClose}
             className="absolute top-3 right-3 z-10 w-10 h-10 flex items-center justify-center bg-white/90 hover:bg-white rounded-full transition-colors shadow-md"
           >
-            <X className="w-5 h-5 text-gray-700" />
+            <X className="w-5 h-5 text-[color:var(--color-ink)]" />
           </button>
 
           <div className="overflow-y-auto max-h-[90vh]">
@@ -184,23 +184,23 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
               <div className="sm:w-1/2 p-4 sm:p-6">
                 <div
                   ref={imageRef}
-                  className="relative aspect-square bg-gray-100 rounded-2xl overflow-hidden flex items-center justify-center"
+                  className="relative aspect-square bg-[color:var(--color-cream)] rounded-2xl overflow-hidden flex items-center justify-center"
                 >
                   {allImages.length > 0 && allImages[selectedImageIndex]?.image_url ? (
                     <img
                       src={allImages[selectedImageIndex].image_url}
                       alt={product.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <ShoppingCart className="w-16 h-16 text-gray-300" />
+                      <ShoppingCart className="w-16 h-16 text-[color:var(--color-ink-soft)]/30" />
                     </div>
                   )}
 
                   {/* Discount Badge */}
                   {hasDiscount && (
-                    <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                    <div className="absolute top-3 left-3 bg-[color:var(--color-brand)] text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
                       −{discountPercentage}%
                     </div>
                   )}
@@ -232,11 +232,11 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
                         key={index}
                         onClick={() => setSelectedImageIndex(index)}
                         className={clsx(
-                          'flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden border-2 transition-colors bg-gray-100 flex items-center justify-center',
-                          index === selectedImageIndex ? 'border-[#a04792]' : 'border-transparent hover:border-gray-300'
+                          'flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden border-2 transition-colors bg-[color:var(--color-cream)] flex items-center justify-center',
+                          index === selectedImageIndex ? 'border-[color:var(--color-brand)]' : 'border-transparent hover:border-[color:var(--color-hairline)]'
                         )}
                       >
-                        <img src={image.image_url} alt="" className="w-full h-full object-cover" />
+                        <img src={image.image_url} alt="" className="w-full h-full object-contain" />
                       </button>
                     ))}
                   </div>
@@ -246,7 +246,7 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
               {/* Details Section */}
               <div className="sm:w-1/2 p-4 sm:p-6 flex flex-col">
                 {/* Name */}
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 leading-tight">
+                <h2 className="font-display text-2xl sm:text-3xl font-bold text-[color:var(--color-ink)] mb-2 leading-tight">
                   {product.name}
                 </h2>
 
@@ -254,15 +254,15 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
                 <div className="mb-4">
                   {hasDiscount ? (
                     <div className="flex items-baseline gap-3">
-                      <del className="text-lg text-gray-400">
+                      <del className="text-lg text-[color:var(--color-ink-soft)]/60">
                         {formatPrice(effectivePrice)}
                       </del>
-                      <ins className="no-underline text-2xl font-bold text-[#a04792]">
+                      <ins className="no-underline text-2xl font-bold text-[color:var(--color-brand)]">
                         {formatPrice(discountedPrice)}
                       </ins>
                     </div>
                   ) : (
-                    <span className="text-2xl font-bold text-[#a04792]">
+                    <span className="text-2xl font-bold text-[color:var(--color-brand)]">
                       {formatPrice(effectivePrice)}
                     </span>
                   )}
@@ -271,7 +271,7 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
                 {/* Variants */}
                 {hasMultipleVariants && (
                   <div className="mb-4">
-                    <h3 className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">
+                    <h3 className="text-xs font-medium text-[color:var(--color-ink-soft)] mb-2 uppercase tracking-wider">
                       Seleccionar opción
                     </h3>
                     <div className="flex flex-wrap gap-2">
@@ -288,16 +288,16 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
                             className={clsx(
                               'px-4 py-3 rounded-xl border-2 transition-all text-left min-w-[100px]',
                               isSelected
-                                ? 'border-[#a04792] bg-[#a04792]/10'
-                                : 'border-gray-200 hover:border-gray-300'
+                                ? 'border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)]'
+                                : 'border-[color:var(--color-hairline)] hover:border-[color:var(--color-ink-soft)]'
                             )}
                           >
-                            <div className="font-medium text-gray-900">{variant.name}</div>
-                            <div className="text-xs text-gray-500">
+                            <div className="font-medium text-[color:var(--color-ink)]">{variant.name}</div>
+                            <div className="text-xs text-[color:var(--color-ink-soft)]">
                               {formatPrice(variantDiscountedPrice)}
                             </div>
                             {variantStock <= 0 && (
-                              <div className="text-[10px] text-pink-600 mt-0.5">Pre-pedido</div>
+                              <div className="text-[10px] text-amber-600 mt-0.5">Pre-pedido</div>
                             )}
                             {variantStock > 0 && variantAvailable === 0 && (
                               <div className="text-[10px] text-red-600 mt-0.5">Reservado</div>
@@ -311,10 +311,10 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
 
                 {/* Description */}
                 <div className="mb-4 flex-1">
-                  <h3 className="text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">
+                  <h3 className="text-xs font-medium text-[color:var(--color-ink-soft)] mb-1 uppercase tracking-wider">
                     Descripción
                   </h3>
-                  <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-[color:var(--color-ink-soft)] leading-relaxed whitespace-pre-wrap">
                     {product.description || 'Sin descripción'}
                   </p>
                 </div>
@@ -334,11 +334,11 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-pink-50 border border-pink-200 rounded-xl p-3 flex items-start gap-2">
-                      <Clock className="w-4 h-4 text-pink-600 flex-shrink-0 mt-0.5" />
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2">
+                      <Clock className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="text-xs font-medium text-pink-800">Pre-pedido disponible</p>
-                        <p className="text-xs text-pink-700">Entrega en {settings.preorder_delivery_time}</p>
+                        <p className="text-xs font-medium text-amber-800">Pre-pedido disponible</p>
+                        <p className="text-xs text-amber-700">Entrega en {settings.preorder_delivery_time}</p>
                       </div>
                     </div>
                   )}
@@ -351,21 +351,21 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
                     <div className="flex items-center justify-center gap-4">
                       <button
                         onClick={handleDecrement}
-                        className="w-12 h-12 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                        className="w-12 h-12 rounded-full bg-[color:var(--color-cream-dark)] hover:bg-[color:var(--color-hairline)] flex items-center justify-center transition-colors"
                       >
-                        <Minus className="w-5 h-5" />
+                        <Minus className="w-5 h-5 text-[color:var(--color-ink)]" />
                       </button>
-                      <span className="text-2xl font-bold w-12 text-center">{quantity}</span>
+                      <span className="text-2xl font-display font-bold w-12 text-center text-[color:var(--color-ink)]">{quantity}</span>
                       <button
                         onClick={handleIncrement}
                         disabled={!isOutOfStock && quantity >= availableStock}
                         className={clsx(
                           "w-12 h-12 rounded-full flex items-center justify-center transition-colors text-white",
                           isOutOfStock
-                            ? "bg-pink-600 hover:bg-pink-500"
+                            ? "bg-amber-600 hover:bg-amber-500"
                             : quantity >= availableStock
                               ? "bg-gray-300 cursor-not-allowed"
-                              : "bg-[#b55ca6] hover:bg-[#9c4a8f]"
+                              : "bg-[color:var(--color-brand)] hover:bg-[color:var(--color-brand-dark)]"
                         )}
                       >
                         <Plus className="w-5 h-5" />
@@ -380,8 +380,8 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
                         isAllStockReserved
                           ? 'bg-gray-300 cursor-not-allowed'
                           : isOutOfStock
-                            ? 'bg-pink-600 hover:bg-pink-500'
-                            : 'bg-[#b55ca6] hover:bg-[#9c4a8f]',
+                            ? 'bg-amber-600 hover:bg-amber-500'
+                            : 'bg-[color:var(--color-brand)] hover:bg-[color:var(--color-brand-dark)]',
                         (hasMultipleVariants && !selectedVariantId) && 'opacity-50 cursor-not-allowed'
                       )}
                     >
@@ -398,8 +398,8 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
                       isAllStockReserved
                         ? 'bg-gray-300 cursor-not-allowed'
                         : isOutOfStock
-                          ? 'bg-pink-600 hover:bg-pink-500'
-                          : 'bg-[#b55ca6] hover:bg-[#9c4a8f]',
+                          ? 'bg-amber-600 hover:bg-amber-500'
+                          : 'bg-[color:var(--color-brand)] hover:bg-[color:var(--color-brand-dark)]',
                       (hasMultipleVariants && !selectedVariantId) && 'opacity-50 cursor-not-allowed'
                     )}
                   >

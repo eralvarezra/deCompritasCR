@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     const { data: settings, error } = await supabase
       .from('settings')
       .select('key, value')
-      .in('key', ['telegram_bot_token', 'telegram_chat_id', 'preorder_delivery_time'])
+      .in('key', ['site_title', 'site_description', 'telegram_bot_token', 'telegram_chat_id', 'preorder_delivery_time'])
 
     if (error) {
       return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 })

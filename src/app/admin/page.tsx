@@ -46,7 +46,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('products')
   const [products, setProducts] = useState<ProductWithVariants[]>([])
   const [orders, setOrders] = useState<Order[]>([])
-  const [settings, setSettings] = useState({ telegram_bot_token: '', telegram_chat_id: '', preorder_delivery_time: '1.5 semanas' })
+  const [settings, setSettings] = useState({ site_title: 'DeCompritas', site_description: '', telegram_bot_token: '', telegram_chat_id: '', preorder_delivery_time: '1.5 semanas' })
   const [telegramTestResult, setTelegramTestResult] = useState<{ success: boolean; message: string } | null>(null)
   const [isTestingTelegram, setIsTestingTelegram] = useState(false)
   const [shippingInstructions, setShippingInstructions] = useState({
@@ -174,7 +174,10 @@ export default function AdminDashboard() {
 
       if (settingsRes.ok) {
         const data = await settingsRes.json()
-        setSettings(data.settings || { telegram_bot_token: '', telegram_chat_id: '', preorder_delivery_time: '1.5 semanas' })
+        setSettings(prev => ({
+          ...prev,
+          ...(data.settings || {}),
+        }))
       }
 
       if (cyclesRes.ok) {
@@ -2281,40 +2284,79 @@ export default function AdminDashboard() {
             {/* Settings Tab */}
             {activeTab === 'settings' && (
               <div className="space-y-8">
+                {/* Site Settings */}
+                <div className="max-w-lg">
+                  <h2 className="text-lg font-semibold mb-4 text-[color:var(--color-ink)]">Configuración del Sitio</h2>
+                  <div className="bg-white rounded-xl shadow-sm border border-[color:var(--color-hairline)] p-6 space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-[color:var(--color-ink)] mb-1">
+                        Nombre de la tienda
+                      </label>
+                      <input
+                        type="text"
+                        value={settings.site_title || ''}
+                        onChange={(e) => setSettings({ ...settings, site_title: e.target.value })}
+                        className="w-full px-4 py-3 rounded-xl border-2 border-[color:var(--color-hairline)] focus:border-[color:var(--color-brand)] outline-none transition-colors"
+                        placeholder="DeCompritas"
+                      />
+                      <p className="text-xs text-[color:var(--color-ink-soft)] mt-1">Este nombre aparecerá en el encabezado de la tienda</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[color:var(--color-ink)] mb-1">
+                        Descripción
+                      </label>
+                      <textarea
+                        value={settings.site_description || ''}
+                        onChange={(e) => setSettings({ ...settings, site_description: e.target.value })}
+                        className="w-full px-4 py-3 rounded-xl border-2 border-[color:var(--color-hairline)] focus:border-[color:var(--color-brand)] outline-none transition-colors resize-none"
+                        rows={3}
+                        placeholder="Explora nuestro catálogo de productos..."
+                      />
+                    </div>
+                    <button
+                      onClick={handleSaveSettings}
+                      className="w-full bg-[color:var(--color-brand)] text-white py-3 rounded-xl font-semibold hover:bg-[color:var(--color-brand-dark)] transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Save className="w-5 h-5" />
+                      Guardar Configuración del Sitio
+                    </button>
+                  </div>
+                </div>
+
                 {/* Telegram Settings */}
                 <div className="max-w-lg">
-                  <h2 className="text-lg font-semibold mb-4">Configuración de Telegram</h2>
-                  <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
+                  <h2 className="text-lg font-semibold mb-4 text-[color:var(--color-ink)]">Configuración de Telegram</h2>
+                  <div className="bg-white rounded-xl shadow-sm border border-[color:var(--color-hairline)] p-6 space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-[color:var(--color-ink)] mb-1">
                         Bot Token
                       </label>
                       <input
                         type="password"
                         value={settings.telegram_bot_token}
                         onChange={(e) => setSettings({ ...settings, telegram_bot_token: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#b55ca6] outline-none transition-colors"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-[color:var(--color-hairline)] focus:border-[color:var(--color-brand)] outline-none transition-colors"
                         placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-[color:var(--color-ink)] mb-1">
                         Chat ID
                       </label>
                       <input
                         type="text"
                         value={settings.telegram_chat_id}
                         onChange={(e) => setSettings({ ...settings, telegram_chat_id: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#b55ca6] outline-none transition-colors"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-[color:var(--color-hairline)] focus:border-[color:var(--color-brand)] outline-none transition-colors"
                         placeholder="-1001234567890"
                       />
                     </div>
                     <button
                       onClick={handleSaveSettings}
-                      className="w-full bg-[#b55ca6] text-white py-3 rounded-xl font-semibold hover:bg-[#9c4a8f] transition-colors flex items-center justify-center gap-2"
+                      className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
                     >
                       <Save className="w-5 h-5" />
-                      Guardar Configuración
+                      Guardar Configuración de Telegram
                     </button>
                     <button
                       onClick={handleTestTelegram}
@@ -2343,24 +2385,24 @@ export default function AdminDashboard() {
 
                 {/* Pre-order Settings */}
                 <div className="max-w-lg">
-                  <h2 className="text-lg font-semibold mb-4">Configuración de Pre-pedidos</h2>
-                  <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
+                  <h2 className="text-lg font-semibold mb-4 text-[color:var(--color-ink)]">Configuración de Pre-pedidos</h2>
+                  <div className="bg-white rounded-xl shadow-sm border border-[color:var(--color-hairline)] p-6 space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-[color:var(--color-ink)] mb-1">
                         Tiempo estimado de entrega
                       </label>
-                      <p className="text-xs text-gray-500 mb-2">Este mensaje se mostrará cuando un producto está agotado</p>
+                      <p className="text-xs text-[color:var(--color-ink-soft)] mb-2">Este mensaje se mostrará cuando un producto está agotado</p>
                       <input
                         type="text"
                         value={settings.preorder_delivery_time}
                         onChange={(e) => setSettings({ ...settings, preorder_delivery_time: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#b55ca6] outline-none transition-colors"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-[color:var(--color-hairline)] focus:border-[color:var(--color-brand)] outline-none transition-colors"
                         placeholder="Ej: 1.5 semanas, 2 semanas, 10 días"
                       />
                     </div>
                     <button
                       onClick={handleSaveSettings}
-                      className="w-full bg-[#b55ca6] text-white py-3 rounded-xl font-semibold hover:bg-[#9c4a8f] transition-colors flex items-center justify-center gap-2"
+                      className="w-full bg-[color:var(--color-brand)] text-white py-3 rounded-xl font-semibold hover:bg-[color:var(--color-brand-dark)] transition-colors flex items-center justify-center gap-2"
                     >
                       <Save className="w-5 h-5" />
                       Guardar Configuración

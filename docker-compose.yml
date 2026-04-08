@@ -12,6 +12,8 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - CRON_SECRET=${CRON_SECRET}
+    volumes:
+      - uploads_data:/app/public/uploads
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
@@ -28,6 +30,10 @@ services:
       - "traefik.http.middlewares.decompritas-redirect.redirectscheme.permanent=true"
     networks:
       - deploy_web
+
+volumes:
+  uploads_data:
+    driver: local
 
 networks:
   deploy_web:

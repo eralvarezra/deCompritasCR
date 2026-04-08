@@ -1,14 +1,29 @@
 @import "tailwindcss";
 
+/* -----------------------------------------------------------
+   Design tokens (Tailwind v4 @theme)
+   ----------------------------------------------------------- */
+@theme {
+  --font-display: var(--font-playfair), ui-serif, Georgia, serif;
+  --font-sans: var(--font-quicksand), ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand — purple/pink girly theme */
+  --color-brand: #b55ca6;
+  --color-brand-soft: #c77db8;
+  --color-brand-dark: #9c4a8f;
+  --color-brand-tint: #f5e6f0;
+
+  --color-cream: #fdf8fc;
+  --color-cream-dark: #f5e6f0;
+  --color-ink: #2d1f2d;
+  --color-ink-soft: #6b4c6b;
+  --color-hairline: #f0e0eb;
+}
+
 @layer base {
   :root {
-    --background: #f9fafb;
-    --foreground: #111827;
-    --primary: #b55ca6;
-    --primary-dark: #9c4a8f;
-    --primary-light: #c77db8;
-    --primary-lighter: #e8d1e4;
-    --price: #a04792;
+    --background: #fdf8fc;
+    --foreground: #2d1f2d;
   }
 
   * {
@@ -24,23 +39,38 @@
   body {
     background: var(--background);
     color: var(--foreground);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior: none;
   }
 
-  /* Prevenir zoom en inputs iOS */
-  input, select, textarea {
-    font-size: 16px !important;
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
   }
 
-  /* Scroll suave en iOS */
+  /* Prevent iOS zoom only on mobile */
+  @media (max-width: 768px) {
+    input, select, textarea {
+      font-size: 16px;
+    }
+  }
+
   .scroll-container {
     -webkit-overflow-scrolling: touch;
   }
 }
 
 @layer utilities {
+  /* Safe areas */
+  .safe-bottom {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
   .line-clamp-1 {
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -55,63 +85,48 @@
     overflow: hidden;
   }
 
-  /* Safe area para notch */
-  .safe-bottom {
-    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
-  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-  .safe-top {
-    padding-top: env(safe-area-inset-top);
+  /* Subtle grain texture for atmosphere */
+  .bg-grain {
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(45,31,45,0.05) 1px, transparent 0),
+      radial-gradient(1px 1px at 80% 70%, rgba(45,31,45,0.04) 1px, transparent 0);
+    background-size: 12px 12px, 18px 18px;
   }
 }
 
 @layer components {
-  .animate-in {
-    animation: animate-in 0.2s ease-out;
-  }
+  .animate-in   { animation: animate-in 0.2s ease-out; }
+  .slide-up     { animation: slide-up   0.3s ease-out; }
+  .bounce-in    { animation: bounce-in  0.3s ease-out; }
+  .shimmer      { animation: shimmer    1.4s linear infinite; background-size: 200% 100%; }
+  .stagger-in   { animation: stagger-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
   @keyframes animate-in {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
   }
-
-  .slide-up {
-    animation: slide-up 0.3s ease-out;
-  }
-
   @keyframes slide-up {
-    from {
-      opacity: 0;
-      transform: translateY(100%);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(100%); }
+    to   { opacity: 1; transform: translateY(0); }
   }
-
-  /* Botones táctiles más grandes */
-  .touch-target {
-    min-height: 44px;
-    min-width: 44px;
-  }
-
-  /* Animación para el botón flotante */
-  .bounce-in {
-    animation: bounce-in 0.3s ease-out;
-  }
-
   @keyframes bounce-in {
-    0% { transform: scale(0); }
-    50% { transform: scale(1.1); }
+    0%   { transform: scale(0); }
+    50%  { transform: scale(1.1); }
     100% { transform: scale(1); }
   }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  @keyframes stagger-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .touch-target { min-height: 44px; min-width: 44px; }
 
   /* Fly to cart animation */
   @keyframes fly-to-cart {
@@ -130,5 +145,15 @@
   }
   .animate-fly-to-cart {
     animation: fly-to-cart 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
