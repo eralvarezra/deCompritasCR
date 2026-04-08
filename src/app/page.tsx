@@ -166,7 +166,7 @@ function CatalogContent() {
               <img
                 src="/logo.png"
                 alt=""
-                className="h-12 md:h-14 w-auto"
+                className="h-20 sm:h-28 md:h-32 lg:h-36 w-auto"
               />
               <span className="hidden sm:block font-display text-2xl md:text-3xl tracking-tight text-[color:var(--color-ink)]">
                 {siteTitle.replace(' Store', '')}<span className="italic text-[color:var(--color-brand)]">.</span>
