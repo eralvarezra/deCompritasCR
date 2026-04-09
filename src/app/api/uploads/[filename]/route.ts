@@ -9,12 +9,16 @@ export async function GET(
 ) {
   try {
     const { filename } = await params
+    console.log('[uploads] Requested filename:', filename)
+    console.log('[uploads] process.cwd():', process.cwd())
 
     if (!filename || filename.includes('..') || filename.includes('/')) {
       return NextResponse.json({ error: 'Invalid filename' }, { status: 400 })
     }
 
     const filepath = path.join(process.cwd(), 'public', 'uploads', filename)
+    console.log('[uploads] Filepath:', filepath)
+    console.log('[uploads] File exists:', existsSync(filepath))
 
     if (!existsSync(filepath)) {
       return NextResponse.json({ error: 'File not found' }, { status: 404 })
