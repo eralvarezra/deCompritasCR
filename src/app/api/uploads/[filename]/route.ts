@@ -10,11 +10,14 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ filename: string }> }
 ) {
-  try {
-    const { filename } = await params
+  let filename = 'unknown'
+  let debugInfo: Record<string, unknown> = {}
 
-    // Debug info in response
-    const debugInfo = {
+  try {
+    const resolvedParams = await params
+    filename = resolvedParams.filename
+
+    debugInfo = {
       filename,
       cwd: process.cwd(),
       uploadsDir: UPLOADS_DIR,
@@ -25,20 +28,22 @@ export async function GET(
     }
 
     const filepath = path.join(UPLOADS_DIR, filename)
+    debugInfo.filepath = filepath
+
+    // Check if file exists
     const fileExists = existsSync(filepath)
+    debugInfo.fileExists = fileExists
+
+    // List files in directory
+    try {
+      const files = readdirSync(UPLOADS_DIR)
+      debugInfo.filesInDir = files.slice(0, 20)
+    } catch (e) {
+      debugInfo.readdirError = String(e)
+    }
 
     if (!fileExists) {
-      // Return debug info in error response
-      const files = readdirSync(UPLOADS_DIR)
-      return NextResponse.json({
-        error: 'File not found',
-        debug: {
-          ...debugInfo,
-          filepath,
-          fileExists,
-          filesInDir: files.slice(0, 10)
-        }
-      }, { status: 404 })
+      return NextResponse.json({ error: 'File not found', debug: debugInfo }, { status: 404 })
     }
 
     const buffer = await readFile(filepath)
@@ -60,7 +65,6 @@ export async function GET(
       },
     })
   } catch (error) {
-    console.error('Error serving file:', error)
-    return NextResponse.json({ error: 'Internal server error', details: String(error) }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error', debug: debugInfo, details: String(error) }, { status: 500 })
   }
 }
