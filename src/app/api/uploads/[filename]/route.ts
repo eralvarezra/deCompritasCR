@@ -3,18 +3,20 @@ import { readFile } from 'fs/promises'
 import { existsSync, readdirSync } from 'fs'
 import path from 'path'
 
+// Use absolute path since process.cwd() might not be reliable in standalone mode
+const UPLOADS_DIR = '/app/public/uploads'
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ filename: string }> }
 ) {
   console.log('[uploads] GET handler called')
   console.log('[uploads] request.url:', request.url)
+  console.log('[uploads] UPLOADS_DIR:', UPLOADS_DIR)
 
   // Debug: Check if we can access the filesystem at all
-  const testPath = path.join(process.cwd(), 'public', 'uploads')
-  console.log('[uploads] Test path:', testPath)
   try {
-    const files = readdirSync(testPath)
+    const files = readdirSync(UPLOADS_DIR)
     console.log('[uploads] Files in uploads:', files)
   } catch (e) {
     console.error('[uploads] Error reading uploads dir:', e)
@@ -29,7 +31,7 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid filename' }, { status: 400 })
     }
 
-    const filepath = path.join(process.cwd(), 'public', 'uploads', filename)
+    const filepath = path.join(UPLOADS_DIR, filename)
     console.log('[uploads] Filepath:', filepath)
     console.log('[uploads] File exists:', existsSync(filepath))
 
