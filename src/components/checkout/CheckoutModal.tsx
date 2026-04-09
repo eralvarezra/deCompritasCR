@@ -341,7 +341,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl max-h-[95vh] overflow-hidden animate-in fade-in slide-up duration-200">
+      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl max-h-[95vh] overflow-hidden animate-in fade-in slide-up duration-200 flex flex-col">
         <div className="flex justify-center pt-3 sm:hidden">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
         </div>
@@ -390,8 +390,8 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="overflow-y-auto scroll-container" style={{ maxHeight: 'calc(95vh - 180px)' }}>
-              <div className="p-4 sm:p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto scroll-container">
+              <div className="p-4 sm:p-6 pb-24 space-y-6">
                 {/* Contact Section */}
                 <section>
                   <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -659,6 +659,10 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 </div>
 
                 {/* Submit Button */}
+                {hasPreOrderItems && (
+                  <p className="text-xs text-amber-600 text-center mb-2">Este pedido requiere un adelanto del 50% para pre-pedidos</p>
+                )}
+                <p className="text-xs text-gray-500 text-center mb-3">Te contactaremos para coordinar el pago y la entrega.</p>
                 <button
                   type="submit"
                   disabled={isSubmitting || state.items.length === 0}
@@ -666,10 +670,6 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 >
                   {isSubmitting ? (<span className="flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin" />Procesando...</span>) : `Confirmar Pedido - ${formatPrice(hasPreOrderItems ? advancePaymentAmount : totalWithShipping)}`}
                 </button>
-                {hasPreOrderItems && (
-                  <p className="text-xs text-amber-600 text-center">Este pedido requiere un adelanto del 50% para pre-pedidos</p>
-                )}
-                <p className="text-xs text-gray-500 text-center">Te contactaremos para coordinar el pago y la entrega.</p>
               </div>
             </form>
           </>

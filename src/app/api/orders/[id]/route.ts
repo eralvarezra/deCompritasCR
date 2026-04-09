@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase/api'
 import { getOrders, updateOrder, updateProductStock, getProduct, deleteOrder } from '@/lib/demo-store'
+import { unlink } from 'fs/promises'
+import path from 'path'
 
 interface OrderItem {
   product_id: string
@@ -17,6 +19,27 @@ interface OrderData {
   phone: string
   total: number
   created_at: string
+  payment_proof_url?: string | null
+}
+
+// Helper function to delete payment proof file
+async function deletePaymentProof(paymentProofUrl: string | null | undefined): Promise<void> {
+  if (!paymentProofUrl) return
+
+  try {
+    // Extract filename from URL (e.g., /uploads/payment-proofs/filename.jpg -> filename.jpg)
+    const filename = paymentProofUrl.split('/').pop()
+    if (!filename) return
+
+    const filePath = path.join(process.cwd(), 'public', 'uploads', 'payment-proofs', filename)
+
+    // Try to delete the file
+    await unlink(filePath)
+    console.log('Deleted payment proof file:', filename)
+  } catch (error) {
+    // File might not exist, log but don't fail
+    console.log('Could not delete payment proof file:', error)
+  }
 }
 
 export async function GET(
@@ -170,13 +193,30 @@ export async function DELETE(
     const supabase = getSupabase()
 
     if (!supabase) {
+      // Demo mode
       const deleted = deleteOrder(id)
       if (!deleted) {
         return NextResponse.json({ error: 'Order not found' }, { status: 404 })
       }
+      // Delete payment proof file if exists
+      await deletePaymentProof(deleted.payment_proof_url)
       return NextResponse.json({ success: true })
     }
 
+    // Get the order first to retrieve payment proof URL
+    const { data: orderData, error: fetchError } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !orderData) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    }
+
+    const order = orderData as OrderData
+
+    // Delete the order
     const { error } = await supabase
       .from('orders')
       .delete()
@@ -185,6 +225,9 @@ export async function DELETE(
     if (error) {
       return NextResponse.json({ error: 'Failed to delete order' }, { status: 500 })
     }
+
+    // Delete payment proof file if exists
+    await deletePaymentProof(order.payment_proof_url)
 
     return NextResponse.json({ success: true })
   } catch (error) {
