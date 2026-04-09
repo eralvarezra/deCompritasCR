@@ -7,6 +7,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ filename: string }> }
 ) {
+  console.log('[uploads] GET handler called')
+  console.log('[uploads] request.url:', request.url)
   try {
     const { filename } = await params
     console.log('[uploads] Requested filename:', filename)
