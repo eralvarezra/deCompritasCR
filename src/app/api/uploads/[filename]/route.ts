@@ -10,33 +10,35 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ filename: string }> }
 ) {
-  console.log('[uploads] GET handler called')
-  console.log('[uploads] request.url:', request.url)
-  console.log('[uploads] UPLOADS_DIR:', UPLOADS_DIR)
-
-  // Debug: Check if we can access the filesystem at all
-  try {
-    const files = readdirSync(UPLOADS_DIR)
-    console.log('[uploads] Files in uploads:', files)
-  } catch (e) {
-    console.error('[uploads] Error reading uploads dir:', e)
-  }
-
   try {
     const { filename } = await params
-    console.log('[uploads] Requested filename:', filename)
-    console.log('[uploads] process.cwd():', process.cwd())
+
+    // Debug info in response
+    const debugInfo = {
+      filename,
+      cwd: process.cwd(),
+      uploadsDir: UPLOADS_DIR,
+    }
 
     if (!filename || filename.includes('..') || filename.includes('/')) {
-      return NextResponse.json({ error: 'Invalid filename' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid filename', debug: debugInfo }, { status: 400 })
     }
 
     const filepath = path.join(UPLOADS_DIR, filename)
-    console.log('[uploads] Filepath:', filepath)
-    console.log('[uploads] File exists:', existsSync(filepath))
+    const fileExists = existsSync(filepath)
 
-    if (!existsSync(filepath)) {
-      return NextResponse.json({ error: 'File not found' }, { status: 404 })
+    if (!fileExists) {
+      // Return debug info in error response
+      const files = readdirSync(UPLOADS_DIR)
+      return NextResponse.json({
+        error: 'File not found',
+        debug: {
+          ...debugInfo,
+          filepath,
+          fileExists,
+          filesInDir: files.slice(0, 10)
+        }
+      }, { status: 404 })
     }
 
     const buffer = await readFile(filepath)
@@ -59,6 +61,6 @@ export async function GET(
     })
   } catch (error) {
     console.error('Error serving file:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error', details: String(error) }, { status: 500 })
   }
 }
