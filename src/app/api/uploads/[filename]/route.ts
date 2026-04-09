@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readFile } from 'fs/promises'
+import { readFile, readdirSync } from 'fs'
 import { existsSync } from 'fs'
 import path from 'path'
 
@@ -9,6 +9,17 @@ export async function GET(
 ) {
   console.log('[uploads] GET handler called')
   console.log('[uploads] request.url:', request.url)
+
+  // Debug: Check if we can access the filesystem at all
+  const testPath = path.join(process.cwd(), 'public', 'uploads')
+  console.log('[uploads] Test path:', testPath)
+  try {
+    const files = readdirSync(testPath)
+    console.log('[uploads] Files in uploads:', files)
+  } catch (e) {
+    console.error('[uploads] Error reading uploads dir:', e)
+  }
+
   try {
     const { filename } = await params
     console.log('[uploads] Requested filename:', filename)
