@@ -285,7 +285,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         phone: fullPhone,
         email: formData.email.trim() || null,
         items: orderItems,
-        total: totalWithShipping,
+        total: totalPrice,
         province: formData.shipping_method !== 'pickup' ? formData.province : null,
         canton: formData.shipping_method !== 'pickup' ? formData.canton.trim() : null,
         district: formData.shipping_method !== 'pickup' ? formData.district.trim() : null,
