@@ -27,6 +27,12 @@ interface WeekCycle {
   updated_at: string
 }
 
+// Helper to convert upload URLs to API URLs
+const getUploadUrl = (url: string | null | undefined) => {
+  if (!url) return null
+  return url.startsWith("/uploads/") ? `/api${url}` : url
+}
+
 interface WeeklyReport {
   cycleId: string
   startDate: string
@@ -1595,13 +1601,13 @@ export default function AdminDashboard() {
                                 <div className="mt-3 pt-3 border-t border-gray-200">
                                   <p className="text-sm text-gray-600 mb-2">Comprobante de pago:</p>
                                   <a
-                                    href={(order as OrderWithExtras).payment_proof_url!}
+                                    href={getUploadUrl((order as OrderWithExtras).payment_proof_url)!}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="block"
                                   >
                                     <img
-                                      src={(order as OrderWithExtras).payment_proof_url!}
+                                      src={getUploadUrl((order as OrderWithExtras).payment_proof_url)!}
                                       alt="Comprobante de pago"
                                       className="max-w-full h-32 object-contain rounded-lg border border-gray-200 hover:border-[#a04792] transition-colors cursor-pointer"
                                     />
@@ -1710,10 +1716,10 @@ export default function AdminDashboard() {
                         <div key={order.id} className="bg-white rounded-xl shadow-sm border overflow-hidden">
                           <div className="aspect-video bg-gray-100 relative">
                             <img
-                              src={orderWithExtras.payment_proof_url!}
+                              src={getUploadUrl(orderWithExtras.payment_proof_url)!}
                               alt={`Comprobante - ${orderNumber}`}
                               className="w-full h-full object-cover"
-                              onClick={() => window.open(orderWithExtras.payment_proof_url!, '_blank')}
+                              onClick={() => window.open(getUploadUrl(orderWithExtras.payment_proof_url)!, '_blank')}
                             />
                             {order.status === 'pending' && amountPaid === 0 && (
                               <div className="absolute top-2 right-2">
