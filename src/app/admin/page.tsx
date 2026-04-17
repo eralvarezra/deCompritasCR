@@ -76,6 +76,7 @@ export default function AdminDashboard() {
   const [productVariants, setProductVariants] = useState<Partial<ProductVariant>[]>([])
   const [productImages, setProductImages] = useState<Partial<ProductImage>[]>([])
   const [isUploading, setIsUploading] = useState(false)
+  const [isSavingProduct, setIsSavingProduct] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -213,6 +214,7 @@ export default function AdminDashboard() {
         setShippingInstructions(data.instructions || shippingInstructions)
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error fetching data:', error)
     } finally {
       setIsLoading(false)
@@ -253,6 +255,7 @@ export default function AdminDashboard() {
         alert(data.error || 'Error al subir la imagen')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Upload error:', error)
       alert('Error al subir la imagen')
     } finally {
@@ -264,6 +267,8 @@ export default function AdminDashboard() {
   }
 
   const handleSaveProduct = async () => {
+    if (isSavingProduct) return
+    setIsSavingProduct(true)
     try {
       // If variants exist, use the first variant's price and stock for the product
       const firstVariant = productVariants[0]
@@ -369,10 +374,12 @@ export default function AdminDashboard() {
         setEditingProduct(null)
         setProductForm({ name: '', description: '', price: '', image_url: '', stock: '', category: '' })
         setProductVariants([])
+        setIsSavingProduct(false)
         setImagePreview(null)
         fetchData()
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error saving product:', error)
     }
   }
@@ -386,6 +393,7 @@ export default function AdminDashboard() {
         setProducts(products.filter((p) => p.id !== id))
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error deleting product:', error)
     }
   }
@@ -402,6 +410,7 @@ export default function AdminDashboard() {
         alert('Configuración guardada correctamente')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error saving settings:', error)
     }
   }
@@ -416,6 +425,7 @@ export default function AdminDashboard() {
       const data = await response.json()
       setTelegramTestResult(data)
     } catch (error) {
+      setIsSavingProduct(false)
       setTelegramTestResult({
         success: false,
         message: 'Error al conectar con el servidor'
@@ -437,6 +447,7 @@ export default function AdminDashboard() {
         alert('Instrucciones de envío guardadas correctamente')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error saving shipping instructions:', error)
     }
   }
@@ -476,6 +487,7 @@ export default function AdminDashboard() {
         alert('Error al guardar el método de pago')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error saving payment method:', error)
       alert('Error al guardar el método de pago')
     }
@@ -500,6 +512,7 @@ export default function AdminDashboard() {
         alert('Error al eliminar el método de pago')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error deleting payment method:', error)
       alert('Error al eliminar el método de pago')
     }
@@ -582,6 +595,7 @@ export default function AdminDashboard() {
         alert('Error al guardar el método de envío')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error saving shipping method:', error)
       alert('Error al guardar el método de envío')
     }
@@ -606,6 +620,7 @@ export default function AdminDashboard() {
         alert('Error al eliminar el método de envío')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error deleting shipping method:', error)
       alert('Error al eliminar el método de envío')
     }
@@ -666,6 +681,7 @@ export default function AdminDashboard() {
         alert('Error al actualizar el pedido')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error updating order:', error)
       alert('Error al actualizar el pedido')
     }
@@ -721,6 +737,7 @@ export default function AdminDashboard() {
         alert('Error al aplicar el descuento')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error applying discount:', error)
       alert('Error al aplicar el descuento')
     } finally {
@@ -743,6 +760,7 @@ export default function AdminDashboard() {
         fetchData()
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error removing discount:', error)
     }
   }
@@ -757,6 +775,7 @@ export default function AdminDashboard() {
         setWeeklyReport(data.report)
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error fetching weekly report:', error)
     } finally {
       setIsLoadingReport(false)
@@ -782,6 +801,7 @@ export default function AdminDashboard() {
         alert(errorData.error || 'Error al generar el reporte')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error generating report:', error)
       alert('Error al generar el reporte')
     } finally {
@@ -809,6 +829,7 @@ export default function AdminDashboard() {
       window.URL.revokeObjectURL(downloadUrl)
       document.body.removeChild(a)
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error downloading Excel:', error)
       alert('Error al descargar el reporte')
     } finally {
@@ -868,6 +889,7 @@ export default function AdminDashboard() {
         alert(errorData.error || 'Error al actualizar la semana')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error updating week cycle:', error)
       alert('Error al actualizar la semana')
     } finally {
@@ -900,6 +922,7 @@ export default function AdminDashboard() {
         alert(errorData.error || 'Error al eliminar la semana')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error deleting week cycle:', error)
       alert('Error al eliminar la semana')
     } finally {
@@ -947,6 +970,7 @@ export default function AdminDashboard() {
         alert(errorData.error || 'Error al actualizar el pedido')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error updating order:', error)
       alert('Error al actualizar el pedido')
     } finally {
@@ -971,6 +995,7 @@ export default function AdminDashboard() {
         alert(errorData.error || 'Error al eliminar el pedido')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error deleting order:', error)
       alert('Error al eliminar el pedido')
     } finally {
@@ -1027,6 +1052,7 @@ export default function AdminDashboard() {
         alert('Error al agregar el pago')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error adding payment:', error)
       alert('Error al agregar el pago')
     } finally {
@@ -1100,6 +1126,7 @@ export default function AdminDashboard() {
         alert('Error al verificar el pago')
       }
     } catch (error) {
+      setIsSavingProduct(false)
       console.error('Error verifying payment:', error)
       alert('Error al verificar el pago')
     } finally {
@@ -2064,6 +2091,7 @@ export default function AdminDashboard() {
                                             alert('Error al eliminar la categoría')
                                           }
                                         } catch (error) {
+      setIsSavingProduct(false)
                                           console.error('Error deleting category:', error)
                                           alert('Error al eliminar la categoría')
                                         }
@@ -2117,6 +2145,7 @@ export default function AdminDashboard() {
                                                     alert('Error al eliminar la subcategoría')
                                                   }
                                                 } catch (error) {
+      setIsSavingProduct(false)
                                                   console.error('Error deleting subcategory:', error)
                                                   alert('Error al eliminar la subcategoría')
                                                 }
@@ -3100,18 +3129,18 @@ export default function AdminDashboard() {
               </div>
               <button
                 onClick={handleSaveProduct}
-                disabled={isUploading}
+                disabled={isUploading || isSavingProduct}
                 className={clsx(
                   'w-full py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2',
-                  isUploading
+                  isUploading || isSavingProduct
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-[#b55ca6] text-white hover:bg-[#9c4a8f]'
                 )}
               >
-                {isUploading ? (
+                {isUploading || isSavingProduct ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    Subiendo...
+                    {isSavingProduct ? 'Guardando...' : 'Subiendo...'}
                   </>
                 ) : (
                   editingProduct ? 'Guardar Cambios' : 'Crear Producto'
@@ -3229,6 +3258,7 @@ export default function AdminDashboard() {
                       alert(responseData.details || responseData.error || 'Error al guardar la categoría')
                     }
                   } catch (error) {
+      setIsSavingProduct(false)
                     console.error('Error saving category:', error)
                     alert('Error al guardar la categoría')
                   }
