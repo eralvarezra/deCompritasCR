@@ -114,3 +114,55 @@ function getDefaultCategories() {
     { id: 'hidratantes', name: 'Hidratantes', slug: 'hidratantes', parent_id: 'skin-care', sort_order: 4, is_active: true, created_at: '', updated_at: '' },
   ]
 }
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ error: 'Category ID is required' }, { status: 400 })
+    }
+
+    const supabase = getSupabase()
+
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+    }
+
+    // Check if category has products
+    const { data: products } = await supabase
+      .from('products')
+      .select('id')
+      .eq('category_id', id)
+      .limit(1)
+
+    if (products && products.length > 0) {
+      return NextResponse.json({ error: 'Cannot delete category with products' }, { status: 400 })
+    }
+
+    // Check if category has subcategories
+    const { data: subcategories } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('parent_id', id)
+      .limit(1)
+
+    if (subcategories && subcategories.length > 0) {
+      return NextResponse.json({ error: 'Cannot delete category with subcategories' }, { status: 400 })
+    }
+
+    const { error } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      return NextResponse.json({ error: 'Failed to delete category', details: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Category deletion error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
