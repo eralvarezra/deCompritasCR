@@ -1,11 +1,7 @@
 import { MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-// REEMPLAZAR antes de publicar: número real de WhatsApp (código de país + número,
-// solo dígitos, sin espacios ni símbolos — ej. 50688887777). El valor de abajo es
-// deliberadamente no numérico para que un link roto sea obvio si se despliega sin
-// reemplazarlo.
-const WHATSAPP_NUMBER = '506XXXXXXXX'
+const WHATSAPP_NUMBER = '50663365661'
 const WHATSAPP_MESSAGE =
   'Hola, quiero información sobre sus servicios de publicidad en redes sociales.'
 

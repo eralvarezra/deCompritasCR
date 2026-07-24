@@ -35,11 +35,6 @@ docker compose build
 docker compose up -d
 ```
 
-## Antes de publicar
-
-- Reemplazar el número de WhatsApp placeholder (`506XXXXXXXX`) en
-  `src/components/WhatsAppButton.tsx` por el número real del negocio.
-
 ## Licencia
 
 MIT License
