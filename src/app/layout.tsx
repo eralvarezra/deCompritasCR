@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Quicksand } from "next/font/google";
-import { StoreProvider } from "@/context/StoreContext";
-import { DynamicTitle } from "@/components/DynamicTitle";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -17,12 +16,9 @@ const quicksand = Quicksand({
 });
 
 export const metadata: Metadata = {
-  title: "DeCompritas — Tienda Online",
-  description: "Explora nuestro catálogo de productos y realiza tu pedido de forma fácil y rápida.",
-  manifest: "/manifest.json",
-  icons: {
-    icon: "/logo.png",
-  },
+  title: "DeCompritas — Publicidad en Redes Sociales",
+  description:
+    "Gestionamos tus campañas de publicidad en Facebook, Instagram y TikTok. Resultados medibles, pagos seguros por PayPal.",
 };
 
 export const viewport: Viewport = {
@@ -30,7 +26,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#b55ca6",
+  themeColor: "#003087",
   viewportFit: "cover",
 };
 
@@ -42,10 +38,8 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${playfair.variable} ${quicksand.variable} antialiased`} suppressHydrationWarning>
       <body className="min-h-screen bg-[color:var(--color-cream)] font-sans overflow-x-hidden" suppressHydrationWarning>
-        <StoreProvider>
-          <DynamicTitle />
-          {children}
-        </StoreProvider>
+        {children}
+        <WhatsAppButton variant="floating" />
       </body>
     </html>
   );

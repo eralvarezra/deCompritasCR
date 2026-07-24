@@ -7,23 +7,25 @@
   --font-display: var(--font-playfair), ui-serif, Georgia, serif;
   --font-sans: var(--font-quicksand), ui-sans-serif, system-ui, sans-serif;
 
-  /* Brand — purple/pink girly theme */
-  --color-brand: #b55ca6;
-  --color-brand-soft: #c77db8;
-  --color-brand-dark: #9c4a8f;
-  --color-brand-tint: #f5e6f0;
+  /* Brand — PayPal-adjacent blue, for trust/payment association */
+  --color-brand: #0070ba;
+  --color-brand-soft: #2f8fcf;
+  --color-brand-dark: #003087;
+  --color-brand-tint: #eaf4fb;
 
-  --color-cream: #fdf8fc;
-  --color-cream-dark: #f5e6f0;
-  --color-ink: #2d1f2d;
-  --color-ink-soft: #6b4c6b;
-  --color-hairline: #f0e0eb;
+  --color-whatsapp: #25d366;
+
+  --color-cream: #f7fafc;
+  --color-cream-dark: #eaf1f6;
+  --color-ink: #0f1b2d;
+  --color-ink-soft: #4a5b6b;
+  --color-hairline: #e2ecf2;
 }
 
 @layer base {
   :root {
-    --background: #fdf8fc;
-    --foreground: #2d1f2d;
+    --background: #f7fafc;
+    --foreground: #0f1b2d;
   }
 
   * {
@@ -50,101 +52,33 @@
     letter-spacing: -0.01em;
   }
 
-  /* Prevent iOS zoom only on mobile */
   @media (max-width: 768px) {
     input, select, textarea {
       font-size: 16px;
     }
   }
-
-  .scroll-container {
-    -webkit-overflow-scrolling: touch;
-  }
 }
 
 @layer utilities {
-  /* Safe areas */
   .safe-bottom {
     padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
   }
   .safe-top {
     padding-top: env(safe-area-inset-top);
   }
-
-  .line-clamp-1 {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .scrollbar-hide::-webkit-scrollbar { display: none; }
-  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-
-  /* Subtle grain texture for atmosphere */
-  .bg-grain {
-    background-image:
-      radial-gradient(1px 1px at 20% 30%, rgba(45,31,45,0.05) 1px, transparent 0),
-      radial-gradient(1px 1px at 80% 70%, rgba(45,31,45,0.04) 1px, transparent 0);
-    background-size: 12px 12px, 18px 18px;
-  }
 }
 
 @layer components {
   .animate-in   { animation: animate-in 0.2s ease-out; }
-  .slide-up     { animation: slide-up   0.3s ease-out; }
-  .bounce-in    { animation: bounce-in  0.3s ease-out; }
-  .shimmer      { animation: shimmer    1.4s linear infinite; background-size: 200% 100%; }
   .stagger-in   { animation: stagger-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
   @keyframes animate-in {
     from { opacity: 0; transform: scale(0.95); }
     to   { opacity: 1; transform: scale(1); }
   }
-  @keyframes slide-up {
-    from { opacity: 0; transform: translateY(100%); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes bounce-in {
-    0%   { transform: scale(0); }
-    50%  { transform: scale(1.1); }
-    100% { transform: scale(1); }
-  }
-  @keyframes shimmer {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
   @keyframes stagger-in {
     from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .touch-target { min-height: 44px; min-width: 44px; }
-
-  /* Fly to cart animation */
-  @keyframes fly-to-cart {
-    0% {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
-    }
-    50% {
-      opacity: 0.8;
-      transform: translate(calc(var(--end-x, 0) * 0.5 - 50%), calc(var(--end-y, 0) * 0.5 - 50%)) scale(0.8);
-    }
-    100% {
-      opacity: 0;
-      transform: translate(calc(var(--end-x, 0) - 50%), calc(var(--end-y, 0) - 50%)) scale(0.3);
-    }
-  }
-  .animate-fly-to-cart {
-    animation: fly-to-cart 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
 }
 
