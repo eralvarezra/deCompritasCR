@@ -164,6 +164,9 @@ function Footer() {
       </span>
       <TrustBadges className="mt-4" />
       <p className="mt-6 text-sm text-[color:var(--color-ink-soft)]">
+        Consultor: Erick Alvarez Ramírez
+      </p>
+      <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
         &copy; {new Date().getFullYear()} DeCompritas. Todos los derechos reservados.
       </p>
     </footer>
